@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title></title>
+  <style>
+    #task-list {
+            list-style-type: none; 
+            padding: 0;
+        }
+        #task-list li {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        #task-list li.completed {
+            text-decoration: line-through;
+            color: gray;
+        }
+        #task-list li button {
+            margin-left: 10px;
+        }
+  </style>
+</head>
+<body>
+
+    
+    <div id="todo-container">
+        <div class="group">
+            <input type="text" id="field1" placeholder="Введіть нове завдання">
+            <button id="add">Додати</button>
+        </div>
+        <ul id="task-list"></ul>
+    </div>
+    
+    <script>
+            document.addEventListener('DOMContentLoaded', () => {
+            loadTasks();
+        });
+
+        function Press(){
+            const taskText = document.getElementById('field1').value.trim();
+
+            if(taskText !== ""){
+                addTask(taskText, false);
+                saveTask(taskText, false);
+                document.getElementById('field1').value = "";
+            }else{
+                alert(`Будь ласка, заповніть поле перед додаванням.`);
+            }
+        }
+
+        function addTask(text, completed) {
+            const taskList = document.getElementById('task-list');
+            const newTask = document.createElement('li');
+            
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = completed;
+            checkbox.addEventListener('change', function() {
+                newTask.classList.toggle('completed');
+                updateTaskStatus(text, checkbox.checked);
+            });
+
+            const taskText = document.createElement('span');
+            taskText.textContent = text;
+            newTask.appendChild(checkbox);
+            newTask.appendChild(taskText);
+
+            const Delete = document.createElement('button');
+            Delete.textContent = 'Видалити';
+            Delete.id = 'bin';
+            Delete.addEventListener('click', function(){
+                newTask.remove();
+                deleteTask(text);
+            });
+            newTask.appendChild(Delete);
+
+            if (completed) {
+                newTask.classList.add('completed');
+            }
+
+            taskList.appendChild(newTask);
+        }
+
+        function saveTask(text, completed) {
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            tasks.push({ text, completed });
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        function loadTasks() {
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            tasks.forEach(task => {
+                addTask(task.text, task.completed);
+            });
+        }
+
+        function updateTaskStatus(text, completed) {
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            tasks = tasks.map(task => task.text === text ? { text: task.text, completed } : task);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        function deleteTask(text) {
+            let tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+            tasks = tasks.filter(task => task.text !== text);
+            localStorage.setItem('tasks', JSON.stringify(tasks));
+        }
+
+        document.getElementById('add').addEventListener('click', Press);
+    </script>
+</body>
+</html>
